@@ -1,0 +1,55 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def load_data(file_path):
+    """Loads mass spectrometry data from an Excel file."""
+    df = pd.read_excel(file_path)
+    df.columns = ['m/z', 'Intensity']  # Ensure correct column names
+    df['Intensity'] = df['Intensity'].astype(float)  # Convert Intensity to float
+    return df
+
+def peak_picking(df, target_mz, tolerance=0.5):
+    """Filters peaks around a target m/z value within a given tolerance."""
+    return df[(df['m/z'] >= target_mz - tolerance) & (df['m/z'] <= target_mz + tolerance)]
+
+def intensity_filter(df, threshold=100000):
+    """Filters out intensities below a specified threshold."""
+    return df[df['Intensity'] >= threshold]
+
+def plot_spectrum(df, mz_min=100, mz_max=600):
+    """Plots mass spectrometry data within a specified m/z range."""
+    df_zoomed = df[(df['m/z'] >= mz_min) & (df['m/z'] <= mz_max)]
+    plt.figure(figsize=(10, 5))
+    sns.lineplot(x=df_zoomed['m/z'], y=df_zoomed['Intensity'], marker='o', color='r', linestyle='-')
+    plt.xlabel("m/z")
+    plt.ylabel("Intensity")
+    plt.title(f"Zoomed-in Mass Spectrometry Data ({mz_min}-{mz_max} m/z)")
+    plt.grid(True)
+    plt.show()
+
+def main():
+    file_path = "Test.xlsx"  # Change this to your actual file path
+    df = load_data(file_path)
+
+
+
+    # EXAMPLES
+
+    # Peak Picking Example
+    target_mz = 411  # Adjust as needed
+    picked_peaks = peak_picking(df, target_mz)
+    picked_peaks.to_excel("peakpicked.xlsx", index=False)
+    print("Peak-picked data saved to 'peakpicked.xlsx'")
+    
+    # Intensity Filtering Example
+    intensity_threshold = 100000
+    filtered_data = intensity_filter(df, intensity_threshold)
+    filtered_data.to_excel("Filtered_Data.xlsx", index=False)
+    print("Filtered data saved to 'Filtered_Data.xlsx'")
+    
+    # Data Visualization Example
+    plot_spectrum(df, mz_min=100, mz_max=600)
+    
+if __name__ == "__main__":
+    main()
